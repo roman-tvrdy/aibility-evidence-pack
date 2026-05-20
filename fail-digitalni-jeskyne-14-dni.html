@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>14 dní v AI zákopu // Hard Delivery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* HD// Space Junkie lock — Space Grotesk + Space Mono.
+       NIKDY Inter, NIKDY Segoe UI, NIKDY system fallback který Inter připomíná.
+       !important + inherit chain donutí font i kdyby renderer měl vlastní style override. */
+    html {
+      font-family: "Space Grotesk", sans-serif !important;
+    }
+    body {
+      font-family: "Space Grotesk", sans-serif !important;
+    }
+    *, *::before, *::after {
+      font-family: inherit !important;
+    }
+    /* Mono override pro labely, kicker, footer */
+    .kicker, .eyebrow, code, kbd, samp, pre,
+    .stat span, .fact span, .mini-mark, .theme-toggle,
+    .theme-toggle *, footer, footer * {
+      font-family: "Space Mono", monospace !important;
+    }
+    :root {
+      --forge:#151515;
+      --red:#7C2128;
+      --brass:#A57C52;
+      --steel:#383C42;
+      --muted:#777B80;
+      --warm:#F5F5F3;
+      --soft:#ECEAE5;
+      --paper:#FFFDF8;
+      --line:#D7D7D2;
+      --shadow:rgba(21,21,21,.15);
+      --r:2px;
+
+      /* Semantic — light default */
+      --bg-grid: rgba(21,21,21,.035);
+      --bg-radial: rgba(124,33,40,.10);
+      --bg-grad-a: var(--warm);
+      --bg-grad-b: var(--soft);
+      --shell-bg: rgba(245,245,243,.98);
+      --shell-border: var(--forge);
+      --card-bg: rgba(255,253,248,.94);
+      --ink: var(--forge);
+      --ink-mute: var(--steel);
+      --rule: var(--line);
+    }
+    body.dark {
+      /* HD// dark — Brand Rule #1 dodržen (žádné white na red) */
+      --bg-grid: rgba(245,245,243,.05);
+      --bg-radial: rgba(124,33,40,.18);
+      --bg-grad-a: #0E0E0E;
+      --bg-grad-b: #15151A;
+      --shell-bg: rgba(20,20,22,.96);
+      --shell-border: #2E2E32;
+      --card-bg: rgba(28,28,30,.94);
+      --ink: var(--warm);
+      --ink-mute: #B3B3B6;
+      --rule: #2E2E32;
+    }
+
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      margin:0;
+      color:var(--ink);
+      font-family:"Space Grotesk", system-ui, sans-serif;
+      background:
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(0deg, var(--bg-grid) 1px, transparent 1px),
+        radial-gradient(circle at 86% 8%, var(--bg-radial), transparent 30%),
+        linear-gradient(135deg, var(--bg-grad-a), var(--bg-grad-b));
+      background-size:34px 34px, 34px 34px, auto, auto;
+      line-height:1.55;
+      -webkit-font-smoothing:antialiased;
+      transition: color .2s ease;
+    }
+
+    /* Shell */
+    .shell {
+      width:min(1100px, calc(100% - 32px));
+      margin:28px auto;
+      border:1px solid var(--shell-border);
+      background:var(--shell-bg);
+      box-shadow:14px 14px 0 rgba(124,33,40,.10), 0 28px 80px var(--shadow);
+      position:relative;
+      overflow:hidden;
+      transition: background-color .2s ease, border-color .2s ease;
+    }
+    .shell:before {
+      content:"";
+      position:absolute;
+      inset:0 0 auto 0;
+      height:10px;
+      background:linear-gradient(90deg, var(--forge) 0 84%, var(--red) 84% 92%, var(--brass) 92% 100%);
+      z-index:2;
+    }
+
+    /* Header */
+    header {
+      padding:46px 54px 38px;
+      border-bottom:1px solid var(--shell-border);
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:32px;
+      align-items:start;
+      background:
+        linear-gradient(180deg, rgba(255,253,248,.04), transparent),
+        repeating-linear-gradient(90deg, transparent 0 38px, var(--bg-grid) 38px 39px);
+    }
+    .eyebrow {
+      margin:0 0 18px;
+      font-family:"Space Mono", monospace;
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:var(--red);
+      font-weight:700;
+    }
+    h1 {
+      margin:0;
+      font-size:clamp(44px, 7.4vw, 88px);
+      line-height:.92;
+      letter-spacing:-.06em;
+      font-weight:800;
+      color:var(--ink);
+      display:inline-flex;
+      align-items:baseline;
+      gap:.05em;
+      flex-wrap:wrap;
+    }
+    h1 .light { font-weight:300; }
+    .square-dot {
+      display:inline-block;
+      width:.17em;
+      height:.17em;
+      background:var(--red);
+      border-radius:1.5px;
+      transform:translateY(.015em);
+      flex:0 0 auto;
+      margin-left:.04em;
+    }
+    .subhead {
+      margin:22px 0 0;
+      max-width:760px;
+      color:var(--ink-mute);
+      font-size:clamp(16px,1.6vw,20px);
+      line-height:1.5;
+      font-weight:400;
+    }
+
+    /* Lockup vpravo nahoře */
+    .lockup-wrap {
+      display:flex; flex-direction:column; align-items:flex-end; gap:14px;
+    }
+    .lockup {
+      text-align:right;
+      font-size:18px;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      white-space:nowrap;
+      color:var(--ink);
+    }
+    .lockup strong { font-weight:800; letter-spacing:.04em; }
+    .slash-a { color:var(--red); font-weight:800; padding-left:.18em; }
+    .slash-b { color:var(--red); font-weight:300; padding-right:.18em; }
+    .mini-mark {
+      display:inline-grid;
+      place-items:center;
+      width:36px;
+      height:36px;
+      margin-left:10px;
+      background:var(--red);
+      color:var(--forge);
+      font-family:"Space Mono", monospace;
+      font-weight:700;
+      letter-spacing:-.22em;
+      padding-right:.16em;
+      border-radius:var(--r);
+      box-shadow:4px 4px 0 rgba(21,21,21,.18);
+      vertical-align:middle;
+      font-size:14px;
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      appearance:none; cursor:pointer;
+      font-family:"Space Mono", monospace;
+      font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+      color:var(--ink); background:transparent;
+      border:1px solid var(--shell-border);
+      padding:8px 12px; line-height:1;
+      border-radius:var(--r);
+      display:inline-flex; align-items:center; gap:8px;
+      transition: border-color .15s ease, background-color .15s ease, color .15s ease;
+      font-weight:700;
+    }
+    .theme-toggle:hover { background:var(--forge); color:var(--warm); }
+    body.dark .theme-toggle:hover { background:var(--warm); color:var(--forge); }
+    .theme-toggle .square-dot { width:8px; height:8px; margin:0; }
+    .theme-toggle .lbl-light { display:none; }
+    body.dark .theme-toggle .lbl-light { display:inline; }
+    body.dark .theme-toggle .lbl-dark { display:none; }
+
+    /* Main */
+    main { padding:36px 54px 44px; }
+
+    /* Stats */
+    .stats {
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:1px; background:var(--rule); border:1px solid var(--rule);
+      margin-bottom:28px;
+    }
+    .stat { background:var(--card-bg); padding:18px 20px; transition: background-color .2s ease; }
+    .stat strong {
+      display:block; font-family:"Space Grotesk", sans-serif;
+      font-size:32px; font-weight:800; line-height:1; letter-spacing:-.04em;
+      color:var(--ink);
+    }
+    .stat span {
+      display:block; margin-top:9px; color:var(--ink-mute);
+      font-family:"Space Mono", monospace;
+      font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+    }
+
+    /* Grid */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+    /* Cards */
+    .card {
+      background:var(--card-bg);
+      border:1px solid var(--rule);
+      border-radius:var(--r);
+      padding:24px 26px;
+      position:relative;
+      transition: background-color .2s ease, border-color .2s ease;
+    }
+    .card.strong-border { border-color:var(--shell-border); }
+    .card:before {
+      content:"";
+      position:absolute;
+      left:-1px; top:-1px;
+      width:10px; height:10px;
+      background:var(--red);
+      border-radius:1.5px;
+    }
+    .card .kicker {
+      margin:0 0 14px;
+      font-family:"Space Mono", monospace;
+      font-size:11px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--red);
+      font-weight:700;
+    }
+    .card h2 {
+      margin:0 0 14px;
+      font-size:clamp(22px,2.6vw,28px);
+      line-height:1.05;
+      letter-spacing:-.04em;
+      font-weight:800;
+      color:var(--ink);
+      display:inline-flex; align-items:baseline; gap:.05em;
+    }
+    .card ul { margin:0; padding-left:1.1rem; }
+    .card li {
+      margin:.55rem 0;
+      color:var(--ink);
+      font-size:15.5px;
+      line-height:1.5;
+      break-inside:avoid;
+    }
+    .card li::marker { color:var(--red); font-weight:800; }
+    .card li strong { font-weight:700; }
+
+    /* Tvrdý závěr — note-dark blok */
+    .note-dark {
+      margin-top:22px;
+      padding:30px 32px;
+      background:var(--forge);
+      color:var(--warm);
+      border-radius:var(--r);
+      border:1px solid var(--forge);
+      position:relative;
+      box-shadow:10px 10px 0 rgba(124,33,40,.18);
+    }
+    .note-dark .kicker {
+      margin:0 0 14px;
+      font-family:"Space Mono", monospace;
+      color:var(--brass);
+      font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+      font-weight:700;
+    }
+    .note-dark h3 {
+      margin:0 0 14px;
+      font-size:clamp(24px,3vw,34px);
+      line-height:1.05;
+      letter-spacing:-.04em;
+      font-weight:800;
+      color:var(--warm);
+      display:inline-flex; align-items:baseline; gap:.04em;
+    }
+    .note-dark p {
+      margin:0 0 10px;
+      color:var(--soft);
+      font-size:16px; line-height:1.55;
+    }
+    .note-dark p:last-child { margin-bottom:0; }
+    .note-dark strong { color:var(--warm); font-weight:700; }
+
+    /* CTA tipy */
+    .tips {
+      margin-top:22px;
+      padding:26px 30px;
+      background:var(--red);
+      color:var(--warm);
+      border-radius:var(--r);
+      box-shadow:8px 8px 0 rgba(21,21,21,.18);
+    }
+    .tips .kicker {
+      margin:0 0 14px;
+      font-family:"Space Mono", monospace;
+      color:var(--warm);
+      font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+      font-weight:700;
+      opacity:.85;
+    }
+    .tips ol { margin:0; padding-left:1.2rem; }
+    .tips li {
+      margin:.5rem 0;
+      font-size:16px; line-height:1.5;
+      font-weight:500;
+    }
+    .tips li::marker { color:var(--warm); font-weight:800; }
+    .tips li strong { font-weight:800; }
+
+    /* Footer (HD-PROTOKOL) */
+    footer {
+      display:flex;
+      justify-content:space-between;
+      gap:20px;
+      padding:18px 54px 22px;
+      border-top:1px solid var(--forge);
+      background:var(--forge);
+      color:var(--warm);
+      font-family:"Space Mono", monospace;
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    footer span { color:var(--brass); }
+
+    /* Responsive */
+    @media (max-width:900px) {
+      .shell { width:100%; margin:0; border-left:0; border-right:0; box-shadow:none; }
+      header, main, footer { padding-left:24px; padding-right:24px; }
+      header { grid-template-columns:1fr; }
+      .lockup-wrap { align-items:flex-start; flex-direction:row; justify-content:space-between; width:100%; }
+      .lockup { text-align:left; }
+      .grid-2 { grid-template-columns:1fr; }
+      .stats { grid-template-columns:repeat(2,1fr); }
+      footer { flex-direction:column; }
+    }
+
+    @media print {
+      body { background:#fff; }
+      .shell { box-shadow:none; margin:0; width:100%; }
+      .theme-toggle { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <article class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">DIGITÁLNÍ JESKYNĚ // TIP ZE ZÁKOPU // 14 DNÍ // 2026-04-28 → 2026-05-12</p>
+        <h1>14 dní v AI zákopu<span class="square-dot"></span></h1>
+        <p class="subhead">Honest debrief napříč 18 projekty. Co fungovalo, co se rozbilo, co bych jeskyňářům doporučil. Bez brožury, bez retuše.</p>
+      </div>
+      <div class="lockup-wrap">
+        <button class="theme-toggle" type="button" aria-label="Přepnout světlý / tmavý režim" onclick="toggleTheme()">
+          <span class="square-dot"></span>
+          <span class="lbl-dark">DARK</span>
+          <span class="lbl-light">LIGHT</span>
+        </button>
+        <div class="lockup"><strong>Hard</strong><span class="slash-a">/</span><span class="slash-b">/</span>Delivery<span class="mini-mark">//</span></div>
+      </div>
+    </header>
+
+    <main>
+
+      <section class="stats" aria-label="Statistika 14 dní">
+        <div class="stat"><strong>18</strong><span>aktivních projektů</span></div>
+        <div class="stat"><strong>6</strong><span>AI nástrojů v rotaci</span></div>
+        <div class="stat"><strong>30+</strong><span>handover dokumentů</span></div>
+        <div class="stat"><strong>2</strong><span>ztracené work-days</span></div>
+      </section>
+
+      <div class="grid-2">
+
+        <section class="card strong-border">
+          <p class="kicker">01 // Nástroje v rotaci</p>
+          <h2>Co denně pracovalo<span class="square-dot"></span></h2>
+          <ul>
+            <li><strong>Claude Cowork</strong> — dispatcher, dokumentace, multi-projekt session</li>
+            <li><strong>Claude Code</strong> — billing aplikace, watchdog, code review panel</li>
+            <li><strong>Claude in Chrome</strong> — letenky, reality, WP publishing, booking</li>
+            <li><strong>Wispr</strong> — přepis hovorů a meetingů přímo do AI-context</li>
+            <li><strong>Codex (GPT)</strong> — code review, <strong>audit AI protokolu</strong>, <strong>kompletní přestavění PACT → PACTman V2</strong></li>
+            <li><strong>Claude Design</strong> — nový hráč na ploše, vizuální iterace a layout reviews</li>
+            <li><strong>Vlastní skills</strong> — briefing, time-log, scrape bytu, content radar</li>
+          </ul>
+        </section>
+
+        <section class="card strong-border">
+          <p class="kicker">02 // Výstupy</p>
+          <h2>Co reálně vzniklo<span class="square-dot"></span></h2>
+          <ul>
+            <li>Standalone <strong>task manager</strong> v HTML s file-system API (žádný server)</li>
+            <li><strong>Top 7 pravidel</strong> pro AI — instruction set držící napříč chaty</li>
+            <li><strong>Project Operating Standard v2</strong> — STATUS / DECISIONS / PHASES</li>
+            <li>3 nezávislé návrhy <strong>code-squad charteru</strong> → syntéza → 7 rozhodnutí</li>
+            <li>Web F1 návrh + odeslané maily klíčovým stakeholderům</li>
+            <li>Finální landing draft validovaný klientem</li>
+            <li>Právní analýza certifikace + úprava 4 stránek webu za den</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <p class="kicker">03 // Klady</p>
+          <h2>Co fungovalo<span class="square-dot"></span></h2>
+          <ul>
+            <li><strong>Multi-perspective merge</strong> — já + Claude + ChatGPT k jedné věci, AI extrahuje rozdíly</li>
+            <li><strong>Wispr → Claude</strong> — meeting přepis se stane AI-context souborem</li>
+            <li><strong>Persistence first</strong> — handover na konci session = další chat startuje za 5 vteřin</li>
+            <li><strong>Panel review</strong> — žádný merge bez 2. AI očí; vychytá to, co první AI prošvihne</li>
+            <li><strong>Skills jako instinct</strong> — každodenní rituály v kódu, ne v hlavě</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <p class="kicker">04 // *****</p>
+          <h2>Co neopakovat<span class="square-dot"></span></h2>
+          <ul>
+            <li><strong>Mass-rename v OneDrive</strong> bez phased approach → 156k cloud ops, ztracený den</li>
+            <li><strong>OneDrive + npm install</strong> = file locks; aktivní vývoj patří mimo sync</li>
+            <li><strong>Git přes sandbox bash</strong> na OneDrive repo → corrupt index 2× po sobě</li>
+            <li><strong>Cowork artifact</strong> jako tool přestal stačit → museli stavět standalone</li>
+            <li><strong>Permission prompty v Code</strong> pro neprogramátora = 60 odkliků naslepo</li>
+            <li><strong>A/B varianty v technice</strong> = AI alibi za chabou rešerši; stop</li>
+          </ul>
+        </section>
+
+      </div>
+
+      <section class="note-dark">
+        <p class="kicker">Tvrdý závěr // poslední týden</p>
+        <h3>Cowork spadl na druhou kolej<span class="square-dot"></span></h3>
+        <p>Updaty Coworku z posledního týdne <strong>výrazně zhoršily produkční výkon</strong> — ping-pong v protokolu, zacyklené opravy vlastních pravidel, sandbox padá pod náporem souborových operací.</p>
+        <p><strong>Veškeré opravy ***** jsem zvládl s Codexem — za zlomek tokenů</strong>, které by tytéž úkoly stály v Coworku. OneDrive recovery, <strong>audit AI protokolu, kompletní přestavění PACT na PACTman V2</strong>, refaktor pravidel — Codex vyřešil sám, čistě, bez drama.</p>
+        <p>Cowork zatím zůstává jako dispatcher a writing-heavy partner. Ale ostrá engineering práce a recovery už jde mimo něj. <strong>Druhá kolej. Bez sentimentu.</strong></p>
+      </section>
+
+      <div class="grid-2" style="margin-top:22px;">
+        <section class="card strong-border">
+          <p class="kicker">Next // co stavíme dál</p>
+          <h2>Coding Squad<span class="square-dot"></span></h2>
+          <p style="margin:0 0 10px; color:var(--ink); font-size:15.5px; line-height:1.5;">Pokračující budování AI kódovacího týmu — charter, role, governance, pilot na reálném projektu. Tři nezávislé návrhy (Claude Code + Codex + Cowork) jsou syntetizované, čeká finalizace.</p>
+          <p style="margin:0; color:var(--ink-mute); font-size:14px; line-height:1.5;">Cíl: produkční tým, kde AI dělá heavy lifting a já držím scope, review a klientskou komunikaci.</p>
+        </section>
+
+        <section class="card strong-border">
+          <p class="kicker">Next // co testujeme</p>
+          <h2>Codex v prohlížeči<span class="square-dot"></span></h2>
+          <p style="margin:0 0 10px; color:var(--ink); font-size:15.5px; line-height:1.5;">OpenAI právě oznámil <strong>Codex přímo v prohlížeči</strong> — žádný IDE, žádný setup, jen tab a úkol. Pilot test na běžné engineering úkoly proti Claude Code.</p>
+          <p style="margin:0; color:var(--ink-mute); font-size:14px; line-height:1.5;">Hypotéza: pro non-trivial fixy a refaktory může být rychlejší a levnější než cokoli, co teď používám.</p>
+        </section>
+      </div>
+
+      <section class="tips">
+        <p class="kicker">4 tipy pro jeskyňáře</p>
+        <ol>
+          <li><strong>Dokumentace = job AI, ne tvůj.</strong> Pokud po každé session vyplňuješ ručně handover, máš špatně nastavený systém.</li>
+          <li><strong>Persistence &gt; perfektní chat.</strong> Lepší 3 chaty s pevným handover než 1 hrdinský na 4 hodiny.</li>
+          <li><strong>Vždy mít druhou AI</strong> pro review (Claude × Codex). Single-AI rozhodnutí = single point of failure.</li>
+          <li><strong>Cloud sync není záloha.</strong> Mass operace bez phased approach a měření velikosti = ztracený den.</li>
+        </ol>
+      </section>
+
+    </main>
+
+    <footer>
+      <div>HARD//DELIVERY <span>//</span> DEBRIEF 14 DNÍ</div>
+      <div>2026-05-12 <span>//</span> doručeno.</div>
+    </footer>
+  </article>
+
+  <script>
+    (function () {
+      var KEY = 'hd-theme';
+      var saved = null;
+      try { saved = localStorage.getItem(KEY); } catch (e) {}
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var initial = saved || (prefersDark ? 'dark' : 'light');
+      if (initial === 'dark') document.body.classList.add('dark');
+    })();
+    function toggleTheme() {
+      var isDark = document.body.classList.toggle('dark');
+      try { localStorage.setItem('hd-theme', isDark ? 'dark' : 'light'); } catch (e) {}
+    }
+  </script>
+</body>
+</html>

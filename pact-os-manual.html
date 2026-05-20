@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HD//PACTman — beta plus</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e8eaf0; line-height: 1.65; padding: 2rem 1rem 5rem; }
+  .container { max-width: 740px; margin: 0 auto; }
+
+  /* HEADER */
+  .header { text-align: center; padding: 3rem 2rem 2.5rem; background: linear-gradient(135deg, #1a1d2e, #1c2038); border-radius: 16px; border: 1px solid #2a2d40; margin-bottom: 2.5rem; }
+  .hd-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; color: #5865f2; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .header h1 { font-size: 2.2rem; font-weight: 900; color: #fff; letter-spacing: -0.02em; margin-bottom: 0.3rem; }
+  .beta-badge { display: inline-block; background: linear-gradient(135deg, #5865f2, #7c3aed); color: #fff; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.75rem; border-radius: 99px; margin-bottom: 1rem; }
+  .header .sub { color: #8b8fa8; font-size: 0.92rem; max-width: 480px; margin: 0 auto 1.5rem; }
+  .credits { font-size: 0.75rem; color: #4a4d60; }
+  .credits span { color: #6b6f88; }
+
+  /* SECTION */
+  .section { margin-bottom: 2.5rem; }
+  .label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5865f2; margin-bottom: 0.85rem; }
+
+  /* VS TABLE */
+  .vs-wrap { background: #1a1d2e; border: 1px solid #2a2d40; border-radius: 14px; overflow: hidden; }
+  .vs-header { display: grid; grid-template-columns: 1.5fr 1fr 1fr; background: #12141f; border-bottom: 1px solid #2a2d40; }
+  .vs-header div { padding: 0.7rem 1rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8b8fa8; }
+  .vs-header div:nth-child(3) { color: #a8b4ff; }
+  .vs-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr; border-bottom: 1px solid #1e2135; align-items: center; }
+  .vs-row:last-child { border-bottom: none; }
+  .vs-row div { padding: 0.65rem 1rem; font-size: 0.82rem; }
+  .vs-row .feat { color: #6b6f88; font-size: 0.78rem; }
+  .vs-row .old { color: #4a4d60; }
+  .vs-row .new { color: #7ecf7e; font-weight: 600; }
+
+  /* TOOL PICKER */
+  .tier-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+  .tier-card { border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color 0.15s; }
+  .tier-card.active { border-color: #5865f2; }
+  .tier-head { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; }
+  .tier-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
+  .tier-info h3 { font-size: 0.92rem; font-weight: 700; color: #fff; }
+  .tier-info p { font-size: 0.8rem; margin-top: 0.1rem; }
+  .tier-tools { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0 1.25rem 1rem; }
+  .tool-pill { background: #12141f; border: 1px solid #2a2d40; border-radius: 6px; padding: 0.2rem 0.6rem; font-size: 0.75rem; color: #8b8fa8; }
+
+  .tier-1 .tier-head { background: #1a1d38; }
+  .tier-1 .tier-num { background: #5865f2; color: #fff; }
+  .tier-1 .tier-info p { color: #a8b4ff; }
+  .tier-1 .tier-tools { background: #161928; }
+
+  .tier-2 .tier-head { background: #1a2a1e; }
+  .tier-2 .tier-num { background: #2d8a3e; color: #fff; }
+  .tier-2 .tier-info p { color: #7ecf7e; }
+  .tier-2 .tier-tools { background: #121e15; }
+
+  .tier-3 .tier-head { background: #2a1e14; }
+  .tier-3 .tier-num { background: #d4821a; color: #fff; }
+  .tier-3 .tier-info p { color: #f0a855; }
+  .tier-3 .tier-tools { background: #1e1610; }
+  .hardcore-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #d4821a; padding: 0.4rem 1.25rem 0.2rem; background: #1e1610; }
+
+  .tier-note { margin-top: 0.85rem; padding: 0.85rem 1.1rem; background: #1a1d2e; border: 1px solid #2a2d40; border-radius: 10px; font-size: 0.82rem; color: #8b8fa8; }
+  .tier-note strong { color: #c8cad8; }
+
+  /* FEATURE SELECTOR */
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  @media (max-width: 520px) { .feature-grid { grid-template-columns: 1fr; } }
+  .feature-card { background: #1a1d2e; border: 2px solid #2a2d40; border-radius: 12px; padding: 1.1rem 1.25rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; position: relative; }
+  .feature-card.core { cursor: default; }
+  .feature-card.selected { border-color: #5865f2; background: #1c1f38; }
+  .feature-card.core { border-color: #2a3558; background: #161928; }
+  .feature-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.35rem; }
+  .feature-name { font-size: 0.87rem; font-weight: 700; color: #fff; }
+  .ftag { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 99px; flex-shrink: 0; }
+  .ftag-core { background: #1e2a4a; color: #6b8aff; }
+  .ftag-opt { background: #1e2e20; color: #6bcf7e; }
+  .feature-desc { font-size: 0.79rem; color: #8b8fa8; }
+  .check { position: absolute; top: 0.8rem; right: 0.8rem; width: 18px; height: 18px; border-radius: 50%; background: #5865f2; display: none; align-items: center; justify-content: center; font-size: 0.62rem; color: #fff; font-weight: 700; }
+  .feature-card.selected:not(.core) .check { display: flex; }
+
+  /* SETUP OUTPUT */
+  .setup-out { background: #12141f; border: 1px solid #2a2d40; border-radius: 12px; padding: 1.25rem; margin-top: 1.25rem; }
+  .setup-out-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5865f2; margin-bottom: 0.75rem; }
+  .setup-out pre { font-size: 0.79rem; color: #c8cad8; white-space: pre-wrap; font-family: 'Courier New', monospace; line-height: 1.6; }
+  .copy-btn { margin-top: 0.85rem; background: #5865f2; color: #fff; border: none; padding: 0.5rem 1.2rem; border-radius: 8px; font-size: 0.81rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .copy-btn:hover { background: #4752d4; }
+  .copy-btn.done { background: #2d8a3e; }
+
+  /* STEPS */
+  .step { display: flex; gap: 1rem; align-items: flex-start; background: #1a1d2e; border: 1px solid #2a2d40; border-radius: 12px; padding: 1.1rem 1.25rem; margin-bottom: 0.75rem; }
+  .step-n { width: 28px; height: 28px; background: #5865f2; color: #fff; font-weight: 800; font-size: 0.82rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step h3 { font-size: 0.88rem; font-weight: 700; color: #fff; margin-bottom: 0.2rem; }
+  .step p { font-size: 0.81rem; color: #8b8fa8; }
+  .step code { background: #12141f; color: #a8b4ff; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.76rem; }
+
+  /* TRAP */
+  .trap { background: #1a1014; border: 1px solid #5c2020; border-radius: 12px; padding: 1.4rem; }
+  .trap-head { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.9rem; }
+  .trap-head h3 { font-size: 0.93rem; font-weight: 800; color: #ff6b6b; }
+  .bubble { background: #12141f; border: 1px solid #2a2d40; border-radius: 10px; border-top-left-radius: 3px; padding: 0.85rem 1.1rem; position: relative; }
+  .bubble::before { content: ''; position: absolute; top: 0; left: -1px; width: 3px; height: 100%; background: #5865f2; border-radius: 3px 0 0 3px; }
+  .bubble-meta { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem; }
+  .b-dot { width: 16px; height: 16px; background: #5865f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; color: #fff; font-weight: 700; }
+  .b-name { font-size: 0.71rem; font-weight: 700; color: #5865f2; }
+  .bubble p { font-size: 0.82rem; color: #c8cad8; }
+  .bubble strong { color: #ff8888; }
+  .path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.7rem; }
+  .path-bad { padding: 0.5rem 0.8rem; background: #180e0e; border: 1px solid #5c2020; border-radius: 7px; font-size: 0.79rem; color: #ff8888; }
+  .path-ok { padding: 0.5rem 0.8rem; background: #0e1a0f; border: 1px solid #2d5c2d; border-radius: 7px; font-size: 0.79rem; color: #7ecf7e; }
+  .trap-fix { margin-top: 0.7rem; padding: 0.65rem 1rem; background: #0e1a0f; border: 1px solid #2d5c2d; border-radius: 8px; font-size: 0.82rem; color: #7ecf7e; }
+
+  /* WHY */
+  .why-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+  .why-card { background: #1a1d2e; border: 1px solid #2a2d40; border-radius: 12px; padding: 1.1rem 1.25rem; }
+  .why-tag { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5865f2; margin-bottom: 0.4rem; }
+  .why-card p { font-size: 0.86rem; color: #c8cad8; line-height: 1.6; }
+
+  /* FLOW */
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; padding: 1.1rem 1.25rem; background: #1a1d2e; border: 1px solid #2a2d40; border-radius: 12px; }
+  .flow-s { background: #12141f; border: 1px solid #2a2d40; border-radius: 7px; padding: 0.38rem 0.78rem; font-size: 0.78rem; color: #c8cad8; }
+  .flow-a { color: #5865f2; }
+
+  .footer { text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #1e2135; font-size: 0.76rem; color: #4a4d60; line-height: 1.8; }
+  .footer strong { color: #6b6f88; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="hd-label">Hard Delivery</div>
+    <h1>HD//PACTman</h1>
+    <div class="beta-badge">beta plus</div>
+    <p class="sub">Operační systém pro AI práci. Otevřeš projekt — Claude ví kde jsi, co čeká, co dělat. Bez copy-paste, bez instrukcí pokaždé znovu.</p>
+    <div class="credits">Vytvořil <span>Roman Tvrdý</span> · Kredity: <span>Filip Drimalka</span> (PACT Framework) · <span>***** *****</span> (GPT/Obsidian)</div>
+  </div>
+
+  <!-- WHY -->
+  <div class="section">
+    <div class="label">Co to vlastně je a proč ti na tom má záležet</div>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-tag">Problém</div>
+        <p>Pokaždé když otevřeš nový chat s AI, začínáš od nuly. Vysvětluješ kdo jsi, na čem děláš, kde jste minule skončili. Po pěti minutách máš kontext zpátky — a pak ti dojdou tokeny.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-tag">Řešení</div>
+        <p>PACTman je sada souborů ve tvé složce, kterou si AI sama přečte při startu chatu. Žádný plugin, žádná instalace. Otevřeš projekt → AI ví kdo jsi, co je rozjetý, kde jste skončili, co je další krok.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-tag">Pro koho</div>
+        <p>Pro kohokoli kdo s AI pracuje denně a má víc projektů. Funguje s Claude (Cowork i web), ChatGPT, Cursorem a dalšími — podle nástroje vybereš Tier 1, 2 nebo 3.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- VS TABLE -->
+  <div class="section">
+    <div class="label">Filip PACT vs. Roman PACTman</div>
+    <div class="vs-wrap">
+      <div class="vs-header">
+        <div>Funkce</div>
+        <div>Filip PACT</div>
+        <div>Roman PACTman</div>
+      </div>
+      <div class="vs-row"><div class="feat">Podstata</div><div class="old">Organizace složek</div><div class="new">Operační systém pro AI</div></div>
+      <div class="vs-row"><div class="feat">Nástroj</div><div class="old">Cursor / CLI</div><div class="new">Jakýkoli AI nástroj</div></div>
+      <div class="vs-row"><div class="feat">Paměť mezi chaty</div><div class="old">— žádná</div><div class="new">✓ Auto po každé session</div></div>
+      <div class="vs-row"><div class="feat">Více projektů</div><div class="old">Ručně</div><div class="new">✓ Auto-dispatcher</div></div>
+      <div class="vs-row"><div class="feat">Učení z konverzací</div><div class="old">— žádné</div><div class="new">✓ Auto-memory systém</div></div>
+      <div class="vs-row"><div class="feat">Výběr modelu</div><div class="old">— žádný</div><div class="new">✓ Doporučení podle úkolu</div></div>
+      <div class="vs-row"><div class="feat">Přenos kontextu</div><div class="old">— žádný</div><div class="new">✓ CHAT-HANDOVER per projekt</div></div>
+      <div class="vs-row"><div class="feat">Setup</div><div class="old">6 manuálních kroků</div><div class="new">✓ Jeden soubor → samo</div></div>
+    </div>
+  </div>
+
+  <!-- TOOL PICKER -->
+  <div class="section">
+    <div class="label">Vyber svůj nástroj</div>
+    <div class="tier-grid">
+
+      <div class="tier-card tier-1" id="tier1" onclick="selectTier(1)">
+        <div class="tier-head">
+          <div class="tier-num">1</div>
+          <div class="tier-info">
+            <h3>Tier 1 — Složkové nástroje</h3>
+            <p>Plný PACT OS. Claude čte soubory přímo. Automatický startup bez manuální práce.</p>
+          </div>
+        </div>
+        <div class="tier-tools">
+          <span class="tool-pill">Cowork</span>
+          <span class="tool-pill">Claude Code</span>
+          <span class="tool-pill">Cursor</span>
+          <span class="tool-pill">Windsurf</span>
+          <span class="tool-pill">Cline</span>
+          <span class="tool-pill">Continue.dev</span>
+          <span class="tool-pill">Aider</span>
+        </div>
+      </div>
+
+      <div class="tier-card tier-2" id="tier2" onclick="selectTier(2)">
+        <div class="tier-head">
+          <div class="tier-num">2</div>
+          <div class="tier-info">
+            <h3>Tier 2 — Claude web</h3>
+            <p>Funguje dobře. Soubory přikládáš ručně, auto-loading není. PACT OS plně funkční.</p>
+          </div>
+        </div>
+        <div class="tier-tools">
+          <span class="tool-pill">Claude.ai web</span>
+          <span class="tool-pill">Claude API</span>
+        </div>
+      </div>
+
+      <div class="tier-card tier-3" id="tier3" onclick="selectTier(3)">
+        <div class="tier-head">
+          <div class="tier-num">3</div>
+          <div class="tier-info">
+            <h3>Tier 3 — Jantaři</h3>
+            <p>Lite verze přes Custom Instructions. Funguje — ale neautomatic. Vyžaduje disciplínu.</p>
+          </div>
+        </div>
+        <div class="tier-tools">
+          <span class="tool-pill">ChatGPT</span>
+          <span class="tool-pill">Gemini</span>
+          <span class="tool-pill">Grok</span>
+          <span class="tool-pill">Copilot</span>
+          <span class="tool-pill">Mistral</span>
+          <span class="tool-pill">DeepSeek</span>
+          <span class="tool-pill">Meta AI</span>
+        </div>
+        <div class="hardcore-label">Hardcore Jantaři — žádná customizace, paste pokaždé</div>
+        <div class="tier-tools" style="padding-top: 0.4rem;">
+          <span class="tool-pill">Perplexity</span>
+          <span class="tool-pill">Poe</span>
+          <span class="tool-pill">You.com</span>
+          <span class="tool-pill">základní API</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="tier-note" id="tierNote">
+      <strong>Vyber nástroj výše</strong> — zobrazíme ti správný setup soubor a instrukce.
+    </div>
+  </div>
+
+  <!-- FEATURE SELECTOR -->
+  <div class="section">
+    <div class="label">Vyber si funkce</div>
+    <div class="feature-grid">
+      <div class="feature-card core selected" data-text="✓ Auto-briefing + dispatcher [CORE]">
+        <div class="feature-top"><div class="feature-name">⚡ Auto-briefing</div><span class="ftag ftag-core">Základ</span></div>
+        <div class="feature-desc">Otevřeš projekt → Claude říká kde jsi, co čeká, první krok. Automaticky.</div>
+        <div class="check">✓</div>
+      </div>
+      <div class="feature-card core selected" data-text="✓ Přenos kontextu — CHAT-HANDOVER [CORE]">
+        <div class="feature-top"><div class="feature-name">🔁 Přenos kontextu</div><span class="ftag ftag-core">Základ</span></div>
+        <div class="feature-desc">Každý projekt má CHAT-HANDOVER. Příští chat navazuje bez ztráty kontextu.</div>
+        <div class="check">✓</div>
+      </div>
+      <div class="feature-card selected" data-text="✓ Učení z konverzací [auto-memory]">
+        <div class="feature-top"><div class="feature-name">🧠 Učení z konverzací</div><span class="ftag ftag-opt">Volitelné</span></div>
+        <div class="feature-desc">Claude ukládá co zjistil o tobě a projektech. Každý chat je chytřejší než předchozí.</div>
+        <div class="check">✓</div>
+      </div>
+      <div class="feature-card selected" data-text="✓ Doporučení modelu [OS.3]">
+        <div class="feature-top"><div class="feature-name">🎯 Výběr modelu</div><span class="ftag ftag-opt">Volitelné</span></div>
+        <div class="feature-desc">Claude doporučí Haiku / Sonnet / Opus podle složitosti úkolu. Neplýtváš.</div>
+        <div class="check">✓</div>
+      </div>
+      <div class="feature-card selected" data-text="✓ Token checkpoint K.0">
+        <div class="feature-top"><div class="feature-name">🔔 Token checkpoint</div><span class="ftag ftag-opt">Volitelné</span></div>
+        <div class="feature-desc">Upozornění když session hrozí přeplněním. Claude navrhne nový chat s handoverem.</div>
+        <div class="check">✓</div>
+      </div>
+      <div class="feature-card" data-text="✓ Time tracking [TIME-TRACKING.md]">
+        <div class="feature-top"><div class="feature-name">⏱️ Time tracking</div><span class="ftag ftag-opt">Volitelné</span></div>
+        <div class="feature-desc">Po každé session Claude navrhne záznam odpracovaného času. Kdo, co, jak dlouho.</div>
+        <div class="check">✓</div>
+      </div>
+    </div>
+
+    <div class="setup-out">
+      <div class="setup-out-label">Tvoje nastavení — zkopíruj a vlož do Claudova setupu</div>
+      <pre id="setupText">Nejdřív vyber nástroj (Tier 1/2/3) výše.</pre>
+      <button class="copy-btn" id="copyBtn" onclick="copySetup()">Zkopírovat</button>
+    </div>
+  </div>
+
+  <!-- HOW TO START -->
+  <div class="section">
+    <div class="label">Jak spustit</div>
+    <div class="step">
+      <div class="step-n">1</div>
+      <div><h3>Vlož setup soubor do Claude</h3>
+      <p>Soubor <code>pact-os-setup-tier[1/2/3].md</code> přilož do chatu. Claude se představí a začne onboarding — ptá se kdo jsi, jaké máš projekty, kde je složka.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-n">2</div>
+      <div><h3>Vlož nastavení funkcí</h3>
+      <p>Zkopíruj text z boxu výše a pošli ho Claudovi jako první zprávu. Claude ví co aktivovat.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-n">3</div>
+      <div><h3>Namapuj složku správně <em>(Tier 1 / Cowork)</em></h3>
+      <p>Nový projekt v Cowork → kořen celé složky kterou ovládáš. Viz ⚠️ Trap níže.</p></div>
+    </div>
+  </div>
+
+  <!-- TRAP -->
+  <div class="section">
+    <div class="label">⚠️ Jediná past která existuje</div>
+    <div class="trap">
+      <div class="trap-head"><span style="font-size:1.3rem">🕳️</span><h3>Špatné mapování složky — platí pro Tier 1</h3></div>
+      <p style="font-size:0.83rem;color:#c8cad8;margin-bottom:0.9rem;">Namapuješ podsložku projektu místo kořene. Soubory PACT nejsou dostupné. Claude vymyslí vlastní realitu. Briefing nefunguje.</p>
+      <div class="bubble">
+        <div class="bubble-meta"><div class="b-dot">AI</div><span class="b-name">Claude · co uvidíš</span></div>
+        <p>Soubory PACT nenalezeny. <strong>Ověř mapování</strong> — projekt musí ukazovat na kořen celé složky. Podsložka nestačí.</p>
+      </div>
+      <div class="path-grid">
+        <div class="path-bad">❌ Špatně<br><small>…/OneDrive/0_Projects/Projekt</small></div>
+        <div class="path-ok">✅ Správně<br><small>…/OneDrive</small></div>
+      </div>
+      <div class="trap-fix"><strong>Fix:</strong> Smaž projekt v Cowork, vytvoř nový, vyber kořen. 2 minuty.</div>
+    </div>
+  </div>
+
+  <!-- FLOW -->
+  <div class="section">
+    <div class="label">Jak vypadá session když to funguje</div>
+    <div class="flow">
+      <div class="flow-s">🖥️ Otevřeš projekt</div><div class="flow-a">→</div>
+      <div class="flow-s">📄 LAWS.md</div><div class="flow-a">→</div>
+      <div class="flow-s">🗂️ PROJECT-INDEX</div><div class="flow-a">→</div>
+      <div class="flow-s">📋 CHAT-HANDOVER</div><div class="flow-a">→</div>
+      <div class="flow-s">✅ Briefing</div>
+    </div>
+    <div style="margin-top:0.7rem;padding:0.8rem 1.1rem;background:#1a1d2e;border:1px solid #2a2d40;border-radius:10px;font-size:0.81rem;color:#8b8fa8;">
+      Žádné instrukce. Žádný copy-paste. Stačí otevřít chat.
+    </div>
+  </div>
+
+  <div class="footer">
+    <p><strong>HD//PACTman</strong> beta plus · Hard Delivery 2026</p>
+    <p>Vytvořil <strong>Roman Tvrdý</strong> · Inspirováno <strong>PACT Framework</strong> od Filipa Drimalky (nowork.ai) · GPT/Obsidian: <strong>***** *****</strong></p>
+    <p style="margin-top:0.3rem;font-size:0.72rem;">Tento soubor je pro lidi. Setup soubory jsou pro Claude.</p>
+  </div>
+
+</div>
+
+<script>
+  let selectedTier = 0;
+
+  const tierNotes = {
+    1: '<strong>Tier 1 — setup soubor:</strong> <code>pact-os-setup-tier1.md</code> · Plný PACT OS, automatický startup. Cowork: namapuj kořen celé složky (viz ⚠️ Trap).',
+    2: '<strong>Tier 2 — setup soubor:</strong> <code>pact-os-setup-tier2.md</code> · Soubory přikládáš ručně při startu session. Vše ostatní funguje automaticky.',
+    3: '<strong>Tier 3 — setup soubor:</strong> <code>pact-os-setup-tier3.md</code> · Zkopíruj LAWS lite do Custom Instructions. Hardcore Jantaři: paste LAWS kontext jako první zprávu každého chatu.'
+  };
+
+  function selectTier(n) {
+    document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('active'));
+    document.getElementById('tier' + n).classList.add('active');
+    selectedTier = n;
+    document.getElementById('tierNote').innerHTML = tierNotes[n];
+    updateOutput();
+  }
+
+  document.querySelectorAll('.feature-card:not(.core)').forEach(card => {
+    card.addEventListener('click', () => {
+      card.classList.toggle('selected');
+      updateOutput();
+    });
+  });
+
+  function updateOutput() {
+    if (!selectedTier) {
+      document.getElementById('setupText').textContent = 'Nejdřív vyber nástroj (Tier 1/2/3) výše.';
+      return;
+    }
+    const tierLabels = { 1: 'Tier 1 (Cowork / Cursor / Claude Code)', 2: 'Tier 2 (Claude.ai web)', 3: 'Tier 3 (Jantaři)' };
+    const selected = [];
+    document.querySelectorAll('.feature-card.selected').forEach(c => { if (c.dataset.text) selected.push(c.dataset.text); });
+    const out = `HD//PACTman beta plus — nastavení instalace\n\nNástroj: ${tierLabels[selectedTier]}\n\nFunkce:\n${selected.join('\n')}\n\nNastavení zkopírováno z pact-os-manual.html. Začni onboardingem.`;
+    document.getElementById('setupText').textContent = out;
+  }
+
+  function copySetup() {
+    const text = document.getElementById('setupText').textContent;
+    if (text.includes('Nejdřív vyber')) return;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Zkopírováno ✓';
+      btn.classList.add('done');
+      setTimeout(() => { btn.textContent = 'Zkopírovat'; btn.classList.remove('done'); }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
